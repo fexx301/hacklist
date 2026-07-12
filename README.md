@@ -1,6 +1,22 @@
 # Hacklist
 
-Hacklist aggregates online hackathons from six sources — **Devpost, MLH, Devfolio, Unstop, HackerEarth, and Twitter/X** — into one searchable dashboard, so you don't have to check each platform individually. A Python backend scrapes and stores listings on a daily schedule and serves them over a small API; a Next.js frontend lets you filter by source, status, and prize, sort the results, and share filtered views by URL.
+**One dashboard for every online hackathon.** Hacklist aggregates listings from six sources — Devpost, MLH, Devfolio, Unstop, HackerEarth, and Twitter/X — scrapes them on a daily schedule, and serves them in a fast, filterable dashboard so you never have to check each platform individually.
+
+![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-backend-009688?logo=fastapi&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-frontend-black?logo=nextdotjs&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-storage-003B57?logo=sqlite&logoColor=white)
+
+![Hacklist dashboard](docs/screenshot.png)
+
+## Features
+
+- **Six sources, one view** — Devpost, MLH, Devfolio, Unstop, HackerEarth, and Twitter/X, deduplicated by URL
+- **Auto-refresh** — a background scheduler re-scrapes all sources every 24 hours; trigger a manual refresh anytime from the sidebar
+- **Filter & sort** — by source, status (upcoming / ongoing / past), prize, and free-text search; sort by soonest deadline, start date, or recently added
+- **Shareable views** — filters are encoded in the URL, so any filtered view can be bookmarked or shared
+- **Status tracking** — hackathons move through upcoming → ongoing → past automatically based on their dates
+- **Deadline badges** — "Ends today / Ends in 3 days" chips surface what's closing soon
 
 ## Architecture
 
@@ -17,64 +33,35 @@ The app runs as **two processes**:
 
 There is also an alternative all-in-one **Streamlit** UI in `app.py` (no separate frontend needed) — see [Alternative: Streamlit UI](#alternative-streamlit-ui).
 
-## Prerequisites
+## Quick start
 
-- **Python 3.14** (a virtualenv is already checked in at `.venv/`)
-- **Node.js** (for the Next.js frontend; dependencies are in `frontend/node_modules`)
+### Prerequisites
 
-## Setup
+- **Python 3.14+**
+- **Node.js 20+**
 
-### 1. Backend environment
-
-The backend reads credentials from a `.env` file at the repo root. Copy the example and fill it in:
+### 1. Backend
 
 ```bash
-cp .env.example .env
-```
-
-The only credentials are for **Twitter/X**, and they are **optional** — they're used solely by the Twitter scraper. Use a throwaway/burner account; the other five sources need no credentials.
-
-```
-TWITTER_USERNAME=...
-TWITTER_PASSWORD=...
-TWITTER_EMAIL=...
-TWITTER_EMAIL_PASSWORD=...
-```
-
-If you don't supply them, the other scrapers still work — the Twitter scrape will simply fail and be logged.
-
-If you need to (re)install Python dependencies:
-
-```bash
+python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
+
+cp .env.example .env   # optional — only needed for the Twitter source
+
+.venv/bin/python -m uvicorn api:app --host 127.0.0.1 --port 8001
 ```
 
-### 2. Frontend environment
+The only credentials are for **Twitter/X**, and they are **optional** — the other five sources need none. If you skip them, the Twitter scrape simply fails and is logged. Use a throwaway/burner account; the scraper authenticates with session cookies (`TWITTER_AUTH_TOKEN`, `TWITTER_CT0`) — see `.env.example`.
 
-`frontend/.env.local` points the UI at the backend:
-
-```
-NEXT_PUBLIC_API_URL=http://localhost:8001
-```
-
-## Running
-
-Start the **backend** (terminal 1):
-
-```bash
-.venv/bin/uvicorn api:app --host 127.0.0.1 --port 8001
-```
-
-Start the **frontend** (terminal 2):
+### 2. Frontend
 
 ```bash
 cd frontend
+npm install
 npm run dev
 ```
 
-Then open **http://localhost:3000**.
-
-On first run with an empty database, the backend triggers a background scrape — give it ~30 seconds and refresh, or hit **Refresh now** in the sidebar.
+Then open **http://localhost:3000**. On first run with an empty database, the backend triggers a background scrape — give it ~30 seconds and refresh, or hit **Refresh now** in the sidebar.
 
 ## API
 
@@ -87,12 +74,14 @@ The backend exposes a small JSON API (consumed by the frontend):
 | `POST` | `/api/refresh` | Trigger a background re-scrape of all sources. |
 | `GET`  | `/api/status` | Whether a scrape is currently running. |
 
+Interactive docs are auto-generated at `http://localhost:8001/docs`.
+
 ## Alternative: Streamlit UI
 
 `app.py` is a self-contained Streamlit dashboard over the same database and scrapers — handy if you don't want to run the separate frontend:
 
 ```bash
-.venv/bin/streamlit run app.py
+.venv/bin/python -m streamlit run app.py
 ```
 
 ## Project layout
@@ -104,4 +93,13 @@ scheduler.py    Runs all scrapers; daily 24h job
 db.py           SQLite access + status logic
 scrapers/       One module per source (devpost, mlh, devfolio, unstop, hackerearth, twitter)
 frontend/       Next.js + Tailwind dashboard
+docs/           Screenshots and documentation assets
 ```
+
+## Roadmap
+
+- [ ] Hosted deployment (Vercel + Railway)
+- [ ] Cross-source deduplication (same event listed on multiple platforms)
+- [ ] Normalized prize parsing (currency-aware sorting)
+- [ ] Scraper fixture tests + CI health checks
+- [ ] Calendar export (`.ics`) and deadline reminders
