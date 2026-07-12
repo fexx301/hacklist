@@ -6,6 +6,8 @@ export type Source =
   | "devfolio"
   | "unstop"
   | "hackerearth"
+  | "dorahacks"
+  | "kaggle"
   | "twitter";
 
 export interface Hackathon {

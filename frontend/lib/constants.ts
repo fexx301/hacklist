@@ -9,6 +9,8 @@ export const SOURCE_META: Record<
   devfolio:    { label: "Devfolio",     color: "#a855f7", bg: "rgba(168,85,247,0.15)" },
   unstop:      { label: "Unstop",       color: "#f97316", bg: "rgba(249,115,22,0.15)" },
   hackerearth: { label: "HackerEarth",  color: "#22c55e", bg: "rgba(34,197,94,0.15)"  },
+  dorahacks:   { label: "DoraHacks",    color: "#eab308", bg: "rgba(234,179,8,0.15)"  },
+  kaggle:      { label: "Kaggle",       color: "#06b6d4", bg: "rgba(6,182,212,0.15)"  },
   twitter:     { label: "Twitter / X",  color: "#94a3b8", bg: "rgba(148,163,184,0.15)"},
 };
 
@@ -24,5 +26,7 @@ export const ALL_SOURCES: Source[] = [
   "devfolio",
   "unstop",
   "hackerearth",
+  "dorahacks",
+  "kaggle",
   "twitter",
 ];

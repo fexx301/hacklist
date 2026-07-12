@@ -6,7 +6,7 @@ from datetime import date, datetime, timedelta, timezone
 DB_PATH = "hackathons.db"
 
 # Prefer richer sources when collapsing cross-source duplicates
-_SOURCE_PRIORITY = ["devpost", "devfolio", "mlh", "hackerearth", "unstop", "twitter"]
+_SOURCE_PRIORITY = ["devpost", "devfolio", "mlh", "hackerearth", "dorahacks", "kaggle", "unstop", "twitter"]
 
 
 def now_iso() -> str:

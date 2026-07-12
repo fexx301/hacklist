@@ -93,3 +93,83 @@ def test_mlh_skips_in_person():
     html = MLH_HTML.replace("OnlineEventAttendanceMode", "OfflineEventAttendanceMode")
     ev = BeautifulSoup(html, "lxml").select_one("a")
     assert MLHScraper()._parse(ev) is None
+
+
+from datetime import date, timedelta
+
+from scrapers.dorahacks import DoraHacksScraper
+from scrapers.kaggle import KaggleScraper
+
+DORAHACKS_ITEM = {
+    "title": "WEEX AI Wars II: Rise of Intelligence",
+    "uname": "weex-ai-wars2",
+    "start_time": 1794002400,   # 2026-11-06 UTC
+    "end_time": 1794193200,     # 2026-11-09 UTC (Nov 8 19:00 EST)
+    "bonus_price": 200000,
+    "venue_name": None,
+    "venue_address": None,
+    "description": "# Welcome!\n\n**Build** AI agents. [Register](https://x.test) now.",
+    "image_url": "https://cdn.dorahacks.io/img.png",
+}
+
+
+def test_dorahacks_parse():
+    h = DoraHacksScraper()._parse(DORAHACKS_ITEM)
+    assert h["title"] == "WEEX AI Wars II: Rise of Intelligence"
+    assert h["url"] == "https://dorahacks.io/hackathon/weex-ai-wars2"
+    assert h["start_date"] == "2026-11-06"
+    assert h["end_date"] == "2026-11-09"
+    assert h["prize"] == "$200,000"
+    assert "Welcome! Build AI agents. Register now." in h["description"]
+
+
+def test_dorahacks_skips_in_person():
+    item = {**DORAHACKS_ITEM, "venue_name": "To be announced"}
+    assert DoraHacksScraper()._parse(item) is None
+
+
+def test_dorahacks_skips_missing_uname():
+    item = {**DORAHACKS_ITEM, "uname": None}
+    assert DoraHacksScraper()._parse(item) is None
+
+
+def _kaggle_item(**overrides):
+    item = {
+        "title": "ARC Prize 2026",
+        "ref": "https://www.kaggle.com/competitions/arc-prize-2026",
+        "enabledDate": "2026-03-25T00:00:00Z",
+        "deadline": (date.today() + timedelta(days=60)).isoformat() + "T23:59:00Z",
+        "reward": "$1,000,000",
+        "description": "Create an AI capable of novel reasoning.",
+    }
+    item.update(overrides)
+    return item
+
+
+def test_kaggle_parse():
+    h = KaggleScraper()._parse(_kaggle_item())
+    assert h["title"] == "ARC Prize 2026"
+    assert h["url"] == "https://www.kaggle.com/competitions/arc-prize-2026"
+    assert h["start_date"] == "2026-03-25"
+    assert h["prize"] == "$1,000,000"
+
+
+def test_kaggle_slug_ref_builds_url():
+    h = KaggleScraper()._parse(_kaggle_item(ref="arc-prize-2026"))
+    assert h["url"] == "https://www.kaggle.com/competitions/arc-prize-2026"
+
+
+def test_kaggle_knowledge_reward_is_not_prize():
+    h = KaggleScraper()._parse(_kaggle_item(reward="Knowledge"))
+    assert h["prize"] is None
+
+
+def test_kaggle_skips_closed_competitions():
+    old = _kaggle_item(deadline="2025-01-01T00:00:00Z")
+    assert KaggleScraper()._parse(old) is None
+
+
+def test_kaggle_scrape_skipped_without_creds(monkeypatch):
+    monkeypatch.delenv("KAGGLE_USERNAME", raising=False)
+    monkeypatch.delenv("KAGGLE_KEY", raising=False)
+    assert KaggleScraper().scrape() == []

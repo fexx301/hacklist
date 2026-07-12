@@ -1,6 +1,6 @@
 # Hacklist
 
-**One dashboard for every online hackathon.** Hacklist aggregates listings from six sources — Devpost, MLH, Devfolio, Unstop, HackerEarth, and Twitter/X — scrapes them on a daily schedule, and serves them in a fast, filterable dashboard so you never have to check each platform individually.
+**One dashboard for every online hackathon.** Hacklist aggregates listings from eight sources — Devpost, MLH, Devfolio, Unstop, HackerEarth, DoraHacks, Kaggle, and Twitter/X — scrapes them on a daily schedule, and serves them in a fast, filterable dashboard so you never have to check each platform individually.
 
 ![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-backend-009688?logo=fastapi&logoColor=white)
@@ -11,7 +11,7 @@
 
 ## Features
 
-- **Six sources, one view** — Devpost, MLH, Devfolio, Unstop, HackerEarth, and Twitter/X, deduplicated by URL
+- **Eight sources, one view** — Devpost, MLH, Devfolio, Unstop, HackerEarth, DoraHacks, Kaggle, and Twitter/X, with cross-source deduplication
 - **Auto-refresh** — a background scheduler re-scrapes all sources every 24 hours; trigger a manual refresh anytime from the sidebar
 - **Filter & sort** — by source, status (upcoming / ongoing / past), prize, and free-text search; sort by soonest deadline, start date, or recently added
 - **Shareable views** — filters are encoded in the URL, so any filtered view can be bookmarked or shared
@@ -51,7 +51,14 @@ cp .env.example .env   # optional — only needed for the Twitter source
 .venv/bin/python -m uvicorn api:app --host 127.0.0.1 --port 8001
 ```
 
-The only credentials are for **Twitter/X**, and they are **optional** — the other five sources need none. If you skip them, the Twitter scrape simply fails and is logged. Use a throwaway/burner account; the scraper authenticates with session cookies (`TWITTER_AUTH_TOKEN`, `TWITTER_CT0`) — see `.env.example`.
+Credentials are **optional** and only gate two sources (the other six need none):
+
+- **Kaggle** — free API token from kaggle.com → Settings → API (`KAGGLE_USERNAME`, `KAGGLE_KEY`)
+- **Twitter/X** — session cookies from a throwaway/burner account (`TWITTER_AUTH_TOKEN`, `TWITTER_CT0`)
+
+See `.env.example` for the full list. Sources without credentials are simply skipped.
+
+> **Why not lablab.ai?** It was evaluated as a source but sits behind a Cloudflare bot challenge that blocks automated access, so it's intentionally excluded rather than scraped against its terms.
 
 ### 2. Frontend
 
@@ -92,7 +99,7 @@ api.py          FastAPI backend (serves the Next.js frontend)
 app.py          Streamlit UI (alternative, standalone)
 scheduler.py    Runs all scrapers; daily 24h job
 db.py           SQLite access + status logic
-scrapers/       One module per source (devpost, mlh, devfolio, unstop, hackerearth, twitter)
+scrapers/       One module per source (devpost, mlh, devfolio, unstop, hackerearth, dorahacks, kaggle, twitter)
 frontend/       Next.js + Tailwind dashboard
 docs/           Screenshots and documentation assets
 ```
