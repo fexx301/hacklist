@@ -40,6 +40,14 @@ There is also an alternative all-in-one **Streamlit** UI in `app.py` (no separat
 - **Python 3.14+**
 - **Node.js 20+**
 
+After one-time setup (steps 1–2 below), start everything with:
+
+```bash
+./run.sh
+```
+
+Ctrl+C stops both processes.
+
 ### 1. Backend
 
 ```bash
