@@ -2,6 +2,10 @@ import type { Hackathon, DashboardData, Filters } from "./types";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
+export function calendarUrl(id: number): string {
+  return `${BASE}/api/hackathons/${id}/calendar.ics`;
+}
+
 export async function fetchHackathons(filters: Filters): Promise<Hackathon[]> {
   const params = new URLSearchParams();
 

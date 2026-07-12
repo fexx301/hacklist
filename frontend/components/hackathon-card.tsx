@@ -2,6 +2,7 @@
 
 import type { CSSProperties } from "react";
 import type { Hackathon } from "@/lib/types";
+import { calendarUrl } from "@/lib/api";
 import { SOURCE_META, STATUS_META } from "@/lib/constants";
 import { getUrgency, URGENCY_STYLE } from "@/lib/dates";
 
@@ -124,22 +125,36 @@ export function HackathonCard({ hackathon }: { hackathon: Hackathon }) {
         </div>
 
         {/* Register button — hover handled purely in CSS via .src-btn */}
-        <a
-          href={hackathon.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="src-btn mt-1 text-center text-xs font-medium py-1.5 px-3 rounded-lg duration-150 active:scale-[0.98]"
-          style={
-            {
-              "--src": src.color,
-              "--src-bg": `${src.color}18`,
-              "--src-bg-hover": `${src.color}30`,
-              "--src-border": `${src.color}30`,
-            } as CSSProperties
-          }
-        >
-          View &amp; Register →
-        </a>
+        <div className="flex items-stretch gap-1.5 mt-1">
+          <a
+            href={hackathon.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="src-btn flex-1 text-center text-xs font-medium py-1.5 px-3 rounded-lg duration-150 active:scale-[0.98]"
+            style={
+              {
+                "--src": src.color,
+                "--src-bg": `${src.color}18`,
+                "--src-bg-hover": `${src.color}30`,
+                "--src-border": `${src.color}30`,
+              } as CSSProperties
+            }
+          >
+            View &amp; Register →
+          </a>
+          {hackathon.start_date && (
+            <a
+              href={calendarUrl(hackathon.id)}
+              title="Add to calendar (.ics)"
+              aria-label="Add to calendar"
+              className="flex items-center justify-center px-2.5 rounded-lg border border-zinc-700/60 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60 transition-colors active:scale-[0.98]"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25A2.25 2.25 0 0 1 18.75 21H5.25A2.25 2.25 0 0 1 3 18.75Z" />
+              </svg>
+            </a>
+          )}
+        </div>
       </div>
     </article>
   );

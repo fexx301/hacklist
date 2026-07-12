@@ -1,6 +1,6 @@
 import re
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, timezone
 
 import dateparser
 import requests
@@ -40,7 +40,7 @@ class BaseScraper(ABC):
         return self.parse_date(parts[0]), None
 
     def determine_status(self, start_date: str | None, end_date: str | None) -> str:
-        today = datetime.utcnow().date()
+        today = datetime.now(timezone.utc).date()
         try:
             start = datetime.strptime(start_date, "%Y-%m-%d").date() if start_date else None
             end   = datetime.strptime(end_date,   "%Y-%m-%d").date() if end_date   else start
@@ -74,5 +74,5 @@ class BaseScraper(ABC):
             "description": description,
             "image_url":   image_url,
             "status":      self.determine_status(start_date, end_date),
-            "scraped_at":  datetime.utcnow().isoformat(),
+            "scraped_at":  datetime.now(timezone.utc).replace(tzinfo=None).isoformat(timespec="seconds"),
         }

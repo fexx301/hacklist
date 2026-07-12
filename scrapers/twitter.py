@@ -1,4 +1,5 @@
 import asyncio
+import html
 import os
 import re
 
@@ -69,21 +70,26 @@ class TwitterScraper(BaseScraper):
                         if "twitter.com" not in resolved and "x.com" not in resolved and "t.co" not in resolved:
                             external = [resolved]
 
-                url = external[0] if external else f"https://x.com/i/web/status/{tweet.id}"
+                # A tweet without a link to an actual hackathon page is noise, skip it
+                if not external:
+                    continue
+                url = external[0]
 
                 if url in seen:
                     continue
                 seen.add(url)
 
                 # Clean up title: strip bare t.co links from display text
-                title = re.sub(r"https://t\.co/\S+", "", tweet.rawContent).strip()
+                text  = html.unescape(tweet.rawContent)
+                title = re.sub(r"https://t\.co/\S+", "", text).strip()
+                title = re.sub(r"\s+", " ", title)
                 if not title:
                     title = url[:100]
 
                 hackathons.append(self.make_hackathon(
                     title=title[:100],
                     url=url,
-                    description=tweet.rawContent,
+                    description=text,
                 ))
 
         return hackathons

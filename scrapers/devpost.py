@@ -1,9 +1,12 @@
+import logging
 import re
 import time
 
 import requests
 
 from .base import BaseScraper
+
+log = logging.getLogger(__name__)
 
 _API = "https://devpost.com/api/hackathons"
 
@@ -46,7 +49,8 @@ class DevpostScraper(BaseScraper):
                 if page >= data.get("meta", {}).get("total_pages", 1):
                     break
 
-            except Exception:
+            except Exception as exc:
+                log.warning("devpost: page %d failed, stopping early: %s", page, exc)
                 break
 
             time.sleep(1)

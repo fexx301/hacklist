@@ -69,9 +69,10 @@ The backend exposes a small JSON API (consumed by the frontend):
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET`  | `/api/hackathons` | List hackathons. Query params: `sources`, `statuses`, `search`, `has_prize`. |
+| `GET`  | `/api/hackathons` | List hackathons (cross-source deduplicated). Query params: `sources`, `statuses`, `search`, `has_prize`, `limit`, `offset`. |
+| `GET`  | `/api/hackathons/{id}/calendar.ics` | Download a hackathon as an iCalendar event. |
 | `GET`  | `/api/stats` | Totals by source/status + per-source last-scrape times. |
-| `POST` | `/api/refresh` | Trigger a background re-scrape of all sources. |
+| `POST` | `/api/refresh` | Trigger a background re-scrape of all sources. Set `REFRESH_TOKEN` in the environment to require an `X-Refresh-Token` header. |
 | `GET`  | `/api/status` | Whether a scrape is currently running. |
 
 Interactive docs are auto-generated at `http://localhost:8001/docs`.
@@ -96,10 +97,20 @@ frontend/       Next.js + Tailwind dashboard
 docs/           Screenshots and documentation assets
 ```
 
+## Development
+
+```bash
+.venv/bin/python -m pip install -r requirements-dev.txt
+.venv/bin/python -m pytest tests/
+```
+
+CI runs the Python test suite plus frontend lint/build on every push (`.github/workflows/ci.yml`).
+
 ## Roadmap
 
+- [x] Cross-source deduplication (same event listed on multiple platforms)
+- [x] Scraper fixture tests + CI
+- [x] Calendar export (`.ics`)
 - [ ] Hosted deployment (Vercel + Railway)
-- [ ] Cross-source deduplication (same event listed on multiple platforms)
 - [ ] Normalized prize parsing (currency-aware sorting)
-- [ ] Scraper fixture tests + CI health checks
-- [ ] Calendar export (`.ics`) and deadline reminders
+- [ ] Email deadline reminders
