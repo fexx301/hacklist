@@ -1,9 +1,12 @@
 import asyncio
 import html
+import logging
 import os
 import re
 
 from .base import BaseScraper
+
+log = logging.getLogger(__name__)
 
 QUERIES = [
     "online hackathon registration open 2026 -is:retweet",
@@ -34,14 +37,22 @@ class TwitterScraper(BaseScraper):
 
         api     = API()
         cookies = f"auth_token={auth_token}; ct0={ct0}"
+        # Re-register the account each run so refreshed cookies in .env
+        # replace the ones cached in accounts.db (expired cookies would
+        # otherwise be reused forever).
+        try:
+            await api.pool.delete_accounts(username)
+        except Exception:
+            pass
         try:
             await api.pool.add_account(
                 username=username, password=password,
                 email=email, email_password="",
                 cookies=cookies,
             )
-        except Exception:
-            pass
+        except Exception as exc:
+            log.warning("twitter: could not register account: %s", exc)
+            return []
 
         hackathons = []
         seen: set[str] = set()
