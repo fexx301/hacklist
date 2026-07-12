@@ -1,0 +1,7 @@
+*.db
+.env
+__pycache__/
+*.pyc
+.twscrape/
+.venv/
+.DS_Store
